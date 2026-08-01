@@ -1,0 +1,24 @@
+{
+  "name": "voodoo-dao-governance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VoodooDAO Governance dApp — PulseChain on-chain voting, proposals, and token locks",
+  "author": "Voodoo Token",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e \"console.log('static site — no build step')\""
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "pulsechain",
+    "dao",
+    "governance",
+    "voodoo",
+    "vdo",
+    "web3"
+  ]
+}

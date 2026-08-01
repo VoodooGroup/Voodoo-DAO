@@ -1,0 +1,212 @@
+/* VoodooDAO Governance styles */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0f172a url('../assets/voodoo-token-background.png') center center / cover no-repeat fixed;
+  color: white;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.proposal-card {
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.status-active { color: #4caf50; }
+.status-queued { color: #ffeb3b; }
+.status-executed { color: #2196f3; }
+.status-canceled { color: #f44336; }
+.status-ended { color: #94a3b8; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  table-layout: fixed;
+}
+
+th,
+td {
+  padding: 12px 10px;
+  text-align: left;
+  border: 1px solid #444;
+  background: transparent;
+  color: #e0e0e0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+colgroup col:nth-child(1) { width: 50px; }
+colgroup col:nth-child(2) { width: 140px; }
+colgroup col:nth-child(3) { width: 220px; }
+colgroup col:nth-child(4) { width: 90px; }
+colgroup col:nth-child(5) { width: 90px; }
+colgroup col:nth-child(6) { width: 90px; }
+colgroup col:nth-child(7) { width: 90px; }
+colgroup col:nth-child(8) { width: 140px; }
+colgroup col:nth-child(9) { width: 140px; }
+
+th {
+  font-weight: 600;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid #444;
+}
+
+tr:hover {
+  background: rgba(100, 116, 139, 0.2);
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+}
+
+.vote-yes {
+  background: #4caf50;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+}
+
+.vote-no {
+  background: #f44336;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+}
+
+.action-btn {
+  background: #2563eb;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.action-btn.execute {
+  background: #7c3aed;
+}
+
+.vote-yes:disabled,
+.vote-no:disabled,
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#info-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+#info-content {
+  background: #1e293b;
+  width: 90vw;
+  max-width: 640px;
+  min-width: 320px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 2rem;
+  padding: 2.5rem;
+  border-radius: 16px;
+  position: relative;
+  box-sizing: border-box;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
+}
+
+#info-content::-webkit-scrollbar { width: 6px; }
+#info-content::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+#info-content::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 10px;
+  border: 1px solid #334155;
+}
+#info-content::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+.close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  font-size: 2.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: white;
+}
+
+footer p { font-size: 18px; }
+footer a { font-size: 28px; color: white; }
+footer a:hover { color: white; }
+
+td:nth-child(4),
+td:nth-child(5),
+td:nth-child(6) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.token-management {
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.token-stat {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+#my-balance,
+#my-locked,
+#dao-total-locked {
+  color: white;
+}
+
+@media (max-width: 640px) {
+  #info-content {
+    width: 94vw;
+    margin: 1.5rem;
+    padding: 1.8rem 1.5rem;
+    border-radius: 14px;
+  }
+}

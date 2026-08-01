@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VoodooDAO Governance</title>
+    <meta name="description" content="VoodooDAO Governance on PulseChain — propose, vote, queue and execute with VDO token locks." />
+    <meta property="og:title" content="VoodooDAO Governance" />
+    <meta property="og:description" content="On-chain governance for Voodoo Token on PulseChain." />
+    <meta property="og:image" content="assets/logo.png" />
+    <meta name="theme-color" content="#0f172a" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/dao.css" />
+    <script src="https://unpkg.com/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+    <link rel="icon" href="assets/logo.png" type="image/png" />
+</head>
+<body class="flex flex-col">
+<!-- Header -->
+<nav class="flex items-center p-4 shadow-md bg-white">
+    <div class="flex items-center flex-grow pl-4">
+        <a href="https://voodootoken.com/" target="_blank" rel="noopener noreferrer">
+            <img src="assets/logo.png" alt="Voodoo Logo" width="180" height="180" class="mr-6" />
+        </a>
+    </div>
+    <div class="flex items-center space-x-4 pr-4">
+        <button id="info-header-btn" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded text-white font-semibold flex items-center gap-2 transition">
+            <i class="fa fa-info-circle"></i> Info
+        </button>
+        <button id="connect-wallet" class="bg-blue-800 hover:bg-blue-700 text-white px-6 py-2 rounded transition duration-300 ease-in-out font-mono">
+            Connect Wallet
+        </button>
+    </div>
+</nav>
+
+<main class="flex-grow p-6 md:p-10 max-w-7xl mx-auto w-full">
+    <div id="error-log" class="text-center mb-8 text-red-400 font-medium min-h-[1.5rem]"></div>
+
+    <!-- VDO Token Management -->
+    <div class="mb-12 max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6 text-center">VDO Token Management</h2>
+        <div id="token-management" class="token-management hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                <div>
+                    <p class="text-gray-400 text-sm">Your VDO Balance</p>
+                    <p id="my-balance" class="token-stat">0.00</p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm">Locked in DAO</p>
+                    <p id="my-locked" class="token-stat">0.00</p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm">Total Locked in DAO</p>
+                    <p id="dao-total-locked" class="token-stat">0.00</p>
+                </div>
+            </div>
+            <div class="mt-8 flex flex-wrap gap-4 justify-center">
+                <button id="approve-button" onclick="approveVDO()" class="bg-green-600 hover:bg-green-500 px-8 py-3 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50" disabled>
+                    <i class="fa fa-check"></i> Approve VDO
+                </button>
+                <button id="unlock-all-button" onclick="unlockAllEligible()" class="bg-orange-600 hover:bg-orange-500 px-8 py-3 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50" disabled>
+                    <i class="fa fa-unlock"></i> Unlock All Eligible
+                </button>
+            </div>
+            <div class="mt-6 text-sm text-orange-300 bg-orange-900/30 p-4 rounded-lg">
+                ⚠️ Proposing or voting locks ALL your current VDO tokens until the proposal is executed, canceled or the voting + timelock period has passed.
+            </div>
+        </div>
+        <p id="token-management-hint" class="text-center text-gray-300">Connect your wallet to manage VDO for governance.</p>
+    </div>
+
+    <!-- DAO Parameters -->
+    <div class="mb-10 max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6 text-center">DAO Parameters</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-lg">
+            <div class="bg-slate-800/90 p-5 rounded-xl"><strong>Voting Duration:</strong> <span id="param-voting">3 days</span></div>
+            <div class="bg-slate-800/90 p-5 rounded-xl"><strong>Timelock Delay:</strong> <span id="param-timelock">2 days</span></div>
+            <div class="bg-slate-800/90 p-5 rounded-xl"><strong>Min Tokens to Propose:</strong> <span id="param-min">10,000 VDO</span></div>
+            <div class="bg-slate-800/90 p-5 rounded-xl"><strong>Quorum:</strong> <span id="param-quorum">10% of snapshot total supply</span></div>
+            <div class="bg-slate-800/90 p-5 rounded-xl"><strong>Majority:</strong> <span id="param-majority">51% yes of votes cast</span></div>
+            <div class="bg-slate-800/90 p-5 rounded-xl">Paused: <span id="paused-status" class="font-bold">Loading...</span></div>
+        </div>
+        <p class="text-center text-sm text-gray-400 mt-4 break-all">
+            DAO: <a id="dao-link" class="text-blue-300 hover:underline" target="_blank" rel="noopener noreferrer" href="#">—</a>
+        </p>
+    </div>
+
+    <!-- Create Proposal -->
+    <div class="mb-12 max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6 text-center">Create Proposal</h2>
+        <div class="bg-slate-800/90 p-8 rounded-2xl shadow-2xl">
+            <select id="proposal-type" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg">
+                <option value="normal">Normal Proposal (transfer, call, etc.)</option>
+                <option value="whitelist">Add New Whitelist Target</option>
+            </select>
+            <input type="text" id="target-address" placeholder="Target Address (0x...)" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg" />
+            <textarea id="call-data" placeholder="Calldata (0x...)" rows="3" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg"></textarea>
+            <input type="text" id="new-target" placeholder="New Target Address to Whitelist (0x...)" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg" style="display: none;" />
+            <textarea id="description" placeholder="Description" rows="4" class="w-full mb-6 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg"></textarea>
+            <button id="submit-proposal" disabled class="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-lg font-semibold transition disabled:opacity-50">Submit Proposal</button>
+        </div>
+    </div>
+
+    <!-- Active Proposals -->
+    <div id="proposals-section" class="mb-16">
+        <h2 class="text-4xl font-bold mb-8 text-center">Active Proposals</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12" id="proposal-list-active">
+            <p class="col-span-full text-center text-xl text-gray-300">Loading active proposals...</p>
+        </div>
+        <div style="overflow-x: auto;">
+            <table id="active-table">
+                <colgroup><col /><col /><col /><col /><col /><col /><col /><col /><col /></colgroup>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Proposer</th><th>Description</th><th>Yes Votes</th><th>No Votes</th>
+                        <th>Total Votes</th><th>Status</th><th>Ends</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="active-body">
+                    <tr><td colspan="9" class="text-center py-8 text-gray-300">Loading active proposals...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Queued -->
+    <div class="mb-16">
+        <h2 class="text-3xl font-bold mb-6 text-center">Queued & Ready to Execute</h2>
+        <div style="overflow-x: auto;">
+            <table id="queued-table">
+                <colgroup><col /><col /><col /><col /><col /><col /><col /><col /><col /></colgroup>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Proposer</th><th>Description</th><th>Yes Votes</th><th>No Votes</th>
+                        <th>Total Votes</th><th>Status</th><th>Queue Time</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="queued-body">
+                    <tr><td colspan="9" class="text-center py-8 text-gray-300">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="max-w-full mx-auto mb-16">
+        <h2 class="text-3xl font-bold mb-6 text-center">Proposal History</h2>
+        <div style="overflow-x: auto;">
+            <table id="history-table">
+                <colgroup><col /><col /><col /><col /><col /><col /><col /><col /><col /></colgroup>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Proposer</th><th>Description</th><th>Yes Votes</th><th>No Votes</th>
+                        <th>Total Votes</th><th>Status</th><th>Ended</th><th>Target</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr><td colspan="9" class="text-center py-8 text-gray-300">Loading history...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Info Modal -->
+<div id="info-modal">
+    <div id="info-content">
+        <span class="close-btn" id="close-modal">&times;</span>
+        <h3 class="text-2xl font-bold mb-6">DAO Info & How to Move Funds</h3>
+        <p class="mb-4"><strong>Key Parameters:</strong></p>
+        <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>Minimum to propose: 10,000 VDO</li>
+            <li>Quorum: 10% of total supply</li>
+            <li>Majority: Yes votes ≥ 51% of total votes cast</li>
+            <li>Timelock: 2 days delay after passing</li>
+            <li>Only whitelisted addresses can be called</li>
+        </ul>
+        <p class="mb-4"><strong>How to transfer funds:</strong></p>
+        <ol class="list-decimal pl-6 mb-6 space-y-2">
+            <li>Connect your wallet (PulseChain)</li>
+            <li>Approve VDO for the DAO</li>
+            <li>Select "Normal Proposal"</li>
+            <li>Target = treasury or other whitelisted address</li>
+            <li>Calldata = encoded call — use <a href="https://abi.hashex.org" target="_blank" rel="noopener noreferrer" class="text-blue-300 underline">abi.hashex.org</a></li>
+            <li>Submit → Vote → Queue → Execute (after timelock)</li>
+        </ol>
+        <p class="mb-4"><strong>Related:</strong></p>
+        <ul class="list-disc pl-6 mb-6 space-y-2">
+            <li>Faucet repo: <a href="https://github.com/VoodooGroup/Faucet" target="_blank" rel="noopener noreferrer" class="text-blue-300 underline">VoodooGroup/Faucet</a></li>
+            <li>Faucet: <code class="text-xs">0xfB3c2cc7Aea25C176eE9FA1bc08A4B7D639d928B</code></li>
+            <li>VDO: <code class="text-xs">0x1c5f8e8E84AcC71650F7a627cfA5B24B80f44f00</code></li>
+        </ul>
+        <p class="text-sm text-gray-400 mt-4">Note: Native PLS sending is not possible (value hardcoded to 0).</p>
+    </div>
+</div>
+
+<footer class="bg-black text-white py-5 mt-auto">
+    <div class="px-6 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-lg">© 2026 Voodoo Token • All rights reserved</p>
+        <div class="flex space-x-8 mt-4 md:mt-0">
+            <a href="https://x.com/Voodoo_Token/" target="_blank" rel="noopener noreferrer" class="transition" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
+            <a href="https://t.me/+oBoh-NebaWcxMDQ0" target="_blank" rel="noopener noreferrer" class="transition" aria-label="Telegram"><i class="fa fa-telegram"></i></a>
+            <a href="https://www.youtube.com/@Voodoo_Token" target="_blank" rel="noopener noreferrer" class="transition" aria-label="YouTube"><i class="fa fa-youtube-play"></i></a>
+        </div>
+    </div>
+</footer>
+
+<!-- App modules (order matters) -->
+<script src="js/config.js"></script>
+<script src="js/helpers.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/dao.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

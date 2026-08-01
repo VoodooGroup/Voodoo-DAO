@@ -1,0 +1,14 @@
+{
+  "contractName": "VDO",
+  "address": "0x1c5f8e8E84AcC71650F7a627cfA5B24B80f44f00",
+  "abi": [
+    "function balanceOf(address) view returns (uint256)",
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+    "function decimals() view returns (uint8)",
+    "function totalSupply() view returns (uint256)",
+    "function transfer(address to, uint256 amount) returns (bool)",
+    "function symbol() view returns (string)",
+    "function name() view returns (string)"
+  ]
+}
