@@ -1,4 +1,76 @@
 /* VoodooDAO Governance styles */
+
+/* Dual wallet buttons (same UX as Plinko / Faucet) */
+.wallet-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.wallet-btn {
+  min-width: 9.5rem;
+  height: 2.4rem;
+  padding: 0 14px;
+  border: none;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.wallet-btn-voodoo {
+  background: #073749;
+}
+.wallet-btn-voodoo:hover:not(:disabled) {
+  background: #0a4a61;
+}
+
+.wallet-btn-other {
+  background: #1e88e5;
+}
+.wallet-btn-other:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.wallet-btn.is-connected,
+.wallet-btn.connected {
+  cursor: default;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.wallet-btn-voodoo.is-connected,
+.wallet-btn-voodoo.connected,
+.wallet-btn-voodoo.is-connected:hover,
+.wallet-btn-voodoo.connected:hover {
+  background: #073749 !important;
+}
+
+.wallet-btn-other.is-connected,
+.wallet-btn-other.connected,
+.wallet-btn-other.is-connected:hover,
+.wallet-btn-other.connected:hover {
+  background: #1e88e5 !important;
+}
+
+.wallet-btn:disabled {
+  opacity: 0.9;
+  cursor: default;
+}
+
+#rainbowkit-root {
+  position: fixed;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  z-index: 9999;
+}
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #0f172a url('../assets/voodoo-token-background.png') center center / cover no-repeat fixed;

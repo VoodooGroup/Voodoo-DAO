@@ -16,16 +16,46 @@
     return;
   }
 
-  async function afterConnect() {
-    const s = await W.connect();
-    if (!s) return;
-    C.bindSigner(s.signer);
-    await C.loadUserTokenData(s.userAddress);
+  async function onConnected(state) {
+    if (!state?.signer) return;
+    C.bindSigner(state.signer);
+    await C.loadUserTokenData(state.userAddress);
     await refreshAll();
   }
 
-  document.getElementById('connect-wallet')?.addEventListener('click', afterConnect);
-  W.bindListeners(afterConnect);
+  // Voodoo Wallet button
+  document.getElementById('voodooWalletBtn')?.addEventListener('click', async () => {
+    if (W.state.userAddress && W.state.walletKind === 'voodoo') return;
+    if (W.state.userAddress) return; // already connected via Other
+    const s = await W.connectVoodoo();
+    await onConnected(s);
+  });
+
+  // Other (RainbowKit / MetaMask / WC)
+  document.getElementById('connectBtn')?.addEventListener('click', async () => {
+    if (W.state.userAddress) return;
+    const s = await W.connectOther();
+    await onConnected(s);
+  });
+
+  // Account switch from extension
+  window.addEventListener('dao:wallet-accounts', async (e) => {
+    const addr = e.detail?.address;
+    if (!addr || !W.state.ethereum) return;
+    try {
+      const provider = new ethers.BrowserProvider(W.state.ethereum, 'any');
+      const signer = await provider.getSigner();
+      W.state.provider = provider;
+      W.state.signer = signer;
+      W.state.userAddress = await signer.getAddress();
+      W.updateButtons();
+      C.bindSigner(W.state.signer);
+      await C.loadUserTokenData(W.state.userAddress);
+      await refreshAll();
+    } catch (err) {
+      console.error(err);
+    }
+  });
 
   window.approveVDO = async () => {
     if (await C.approveVDO()) {

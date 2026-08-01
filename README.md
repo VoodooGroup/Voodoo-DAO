@@ -56,7 +56,10 @@ Same idea as other Voodoo dApps: HTML shell + `js/` modules + `Interaction/` ABI
 
 ## Features
 
-- Connect wallet + auto-switch / add PulseChain
+- **Voodoo Wallet** + **Other** connect buttons (same UX as Plinko / Faucet)
+  - Voodoo Wallet → browser extension
+  - Other → RainbowKit (MetaMask, WalletConnect, Rabby, …)
+- Auto-switch / add PulseChain
 - VDO balance, locked balance, total locked
 - Approve VDO + unlock eligible tokens
 - Create normal or whitelist-target proposals
