@@ -197,26 +197,31 @@ window.VoodooWallet = (function () {
     return err instanceof Error ? err : new Error(msg);
   }
 
-  function requestVoodooAccounts(ethereum, { isCurrent, timeoutMs = 120_000 } = {}) {
+  /**
+   * One eth_requestAccounts per button click.
+   * Do NOT hard-timeout: the Voodoo inpage provider waits forever so the
+   * extension can show unlock/connect UI. A short dApp timeout used to reject
+   * early and made it look like the wallet "never opened".
+   */
+  function requestVoodooAccounts(ethereum, { isCurrent } = {}) {
     return new Promise((resolve, reject) => {
       let settled = false;
       const finish = (ok, val) => {
         if (settled) return;
+        // Newer button click superseded this attempt
         if (typeof isCurrent === 'function' && !isCurrent()) {
           settled = true;
-          clearTimeout(hardTimer);
+          const err = new Error('restart');
+          err.code = 'ACTION_REJECTED';
+          err.silent = true;
+          reject(err);
           return;
         }
         settled = true;
-        clearTimeout(hardTimer);
         if (ok) resolve(val);
         else reject(val);
       };
-      const hardTimer = setTimeout(() => {
-        const err = new Error('Voodoo Wallet did not respond. Click Voodoo Wallet again.');
-        err.code = 'VOODOO_TIMEOUT';
-        finish(false, err);
-      }, timeoutMs);
+      // Opens extension popup / unlock screen (extension openWalletForApproval)
       ethereum
         .request({ method: 'eth_requestAccounts' })
         .then((accs) => finish(true, accs || []))
@@ -250,26 +255,10 @@ window.VoodooWallet = (function () {
     let accounts;
     try {
       onStatus?.('requesting');
-      const withTimeout = (p, ms) =>
-        Promise.race([
-          p,
-          new Promise((_, reject) => {
-            setTimeout(() => {
-              const err = new Error(
-                kind === 'voodoo'
-                  ? 'Voodoo Wallet did not respond. Unlock the extension and try again.'
-                  : 'Wallet did not respond. Try again.'
-              );
-              err.code = 'VOODOO_TIMEOUT';
-              reject(err);
-            }, ms);
-          }),
-        ]);
-
       if (kind === 'voodoo') {
+        // Wait for extension unlock + Connect (no dApp-side timeout)
         accounts = await requestVoodooAccounts(ethereum, {
           isCurrent: ethereum.__voodooIsCurrent,
-          timeoutMs: 90_000,
         });
       } else {
         try {
@@ -278,7 +267,7 @@ window.VoodooWallet = (function () {
           accounts = [];
         }
         if (!accounts?.length) {
-          accounts = await withTimeout(ethereum.request({ method: 'eth_requestAccounts' }), 90_000);
+          accounts = await ethereum.request({ method: 'eth_requestAccounts' });
         }
       }
       onStatus?.('connected');
@@ -460,11 +449,18 @@ window.VoodooWallet = (function () {
   }
 
   async function connectVoodoo(onStatus) {
+    // Must run from the Voodoo Wallet BUTTON click (user gesture).
     const gen = ++voodooConnectGen;
     const isCurrent = () => gen === voodooConnectGen;
 
     onStatus?.('detecting');
-    const ethereum = await getVoodooWalletProvider();
+    // Prefer SYNC provider first so eth_requestAccounts stays in the click
+    // gesture path — delayed EIP-6963 wait can prevent the extension UI
+    // from opening on some Chrome builds.
+    let ethereum = findVoodooSync();
+    if (!ethereum) {
+      ethereum = await discoverVoodooViaEip6963(350);
+    }
     if (!ethereum) {
       const err = new Error(
         'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page.'
@@ -476,6 +472,7 @@ window.VoodooWallet = (function () {
     if (!isCurrent()) {
       const err = new Error('restart');
       err.code = 'ACTION_REJECTED';
+      err.silent = true;
       throw err;
     }
 
@@ -484,6 +481,7 @@ window.VoodooWallet = (function () {
     ethereum.__voodooIsCurrent = isCurrent;
 
     try {
+      // Fire eth_requestAccounts ASAP — extension opens unlock/connect UI
       return await connectWithProvider(ethereum, 'voodoo', onStatus);
     } finally {
       try {

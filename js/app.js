@@ -23,12 +23,20 @@
     await refreshAll();
   }
 
-  // Voodoo Wallet button
+  // Voodoo Wallet button — keep handler lightweight so extension popup can open
+  let voodooClickBusy = false;
   document.getElementById('voodooWalletBtn')?.addEventListener('click', async () => {
     if (W.state.userAddress && W.state.walletKind === 'voodoo') return;
     if (W.state.userAddress) return; // already connected via Other
-    const s = await W.connectVoodoo();
-    await onConnected(s);
+    if (voodooClickBusy) return;
+    voodooClickBusy = true;
+    try {
+      // Opens extension unlock/connect UI via eth_requestAccounts (no dApp modal if locked)
+      const s = await W.connectVoodoo();
+      await onConnected(s);
+    } finally {
+      voodooClickBusy = false;
+    }
   });
 
   // Other (RainbowKit / MetaMask / WC)
