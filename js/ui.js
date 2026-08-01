@@ -123,11 +123,13 @@ window.VoodooUI = (function () {
     if (!raw) return null;
 
     if (
-      /cancelled in wallet|connection cancelled|user rejected|user denied|rejected the request|ACTION_REJECTED/i.test(
+      /cancelled in wallet|connection cancelled|user rejected|user denied|rejected the request|ACTION_REJECTED|VOODOO_LOCKED|wallet is locked|wallet locked|unlock the extension|unlock voodoo wallet first/i.test(
         raw
       ) ||
-      raw === '4001'
+      raw === '4001' ||
+      raw === '4100'
     ) {
+      // Cancelled or locked — extension lock screen handles unlock; no dApp modal
       return null;
     }
 
