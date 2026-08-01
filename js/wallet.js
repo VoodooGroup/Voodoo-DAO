@@ -612,6 +612,36 @@ window.DAO_WALLET = (() => {
     document.getElementById('token-management-hint')?.classList.add('hidden');
   }
 
+  function clearStatus() {
+    window.DAO_HELPERS?.setLog('');
+  }
+
+  /**
+   * Centered white modal — same as Staking / Bank / Faucet.
+   * Never dump install URLs into the red status banner.
+   */
+  function showVoodooPopup(message) {
+    clearStatus();
+    if (window.VoodooUI?.notifyWalletError) {
+      return window.VoodooUI.notifyWalletError(message);
+    }
+    if (window.VoodooUI?.show) {
+      return window.VoodooUI.show({
+        title: 'Voodoo Wallet',
+        message:
+          'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.',
+        type: 'error',
+        okText: 'OK',
+      });
+    }
+    // last resort (should not happen if ui.js is loaded)
+    window.DAO_HELPERS?.setLog(
+      'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.',
+      true
+    );
+    return Promise.resolve(false);
+  }
+
   async function connectVoodoo() {
     const H = window.DAO_HELPERS;
     H.setLog('Connecting Voodoo Wallet…');
@@ -633,11 +663,21 @@ window.DAO_WALLET = (() => {
       return state;
     } catch (err) {
       console.error(err);
-      if (err?.code === 'VOODOO_NOT_FOUND' && err.installUrl) {
-        H.setLog(err.message + ' Install: ' + err.installUrl, true);
-      } else {
-        H.setLog('Voodoo Wallet: ' + H.errMsg(err), true);
+      clearStatus();
+      // User cancelled — silent (same as Bank)
+      if (
+        err?.code === 4001 ||
+        err?.code === 'ACTION_REJECTED' ||
+        /reject|denied|cancel|dismiss/i.test(String(err?.message || ''))
+      ) {
+        return null;
       }
+      // Not installed / not detected → polished modal (no install URL in banner)
+      await showVoodooPopup(
+        err?.code === 'VOODOO_NOT_FOUND' || /not detected|not ready/i.test(String(err?.message || ''))
+          ? 'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.'
+          : err?.message || 'Voodoo Wallet connection failed'
+      );
       return null;
     }
   }
