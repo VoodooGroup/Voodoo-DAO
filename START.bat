@@ -4,7 +4,7 @@ cd /d "%~dp0"
 set PORT=8787
 
 echo.
-echo  VoodooDAO Governance
+echo  Voodoo Governance
 echo  http://localhost:%PORT%
 echo.
 

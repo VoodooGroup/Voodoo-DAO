@@ -1,4 +1,4 @@
-# VoodooDAO Governance
+# Voodoo Governance
 
 On-chain governance dApp for **Voodoo Token (VDO)** on **PulseChain**.
 

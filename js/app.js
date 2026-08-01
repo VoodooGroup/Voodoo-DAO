@@ -1,5 +1,5 @@
 /**
- * UI wiring + proposal tables for VoodooDAO Governance
+ * UI wiring + proposal tables for Voodoo Governance
  */
 (async function boot() {
   const H = window.DAO_HELPERS;

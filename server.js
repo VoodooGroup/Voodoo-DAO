@@ -1,5 +1,5 @@
 /**
- * Local static file server for VoodooDAO Governance.
+ * Local static file server for Voodoo Governance.
  * Usage: npm start  (or node server.js)
  */
 const http = require('http');
@@ -45,5 +45,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`VoodooDAO Governance → http://localhost:${PORT}`);
+  console.log(`Voodoo Governance → http://localhost:${PORT}`);
 });

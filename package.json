@@ -2,7 +2,7 @@
   "name": "voodoo-dao-governance",
   "version": "1.0.0",
   "private": true,
-  "description": "VoodooDAO Governance dApp — PulseChain on-chain voting, proposals, and token locks",
+  "description": "Voodoo Governance dApp — PulseChain on-chain voting, proposals, and token locks",
   "author": "Voodoo Token",
   "license": "MIT",
   "scripts": {
