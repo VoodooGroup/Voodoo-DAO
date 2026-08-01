@@ -31,17 +31,18 @@
   background: #0a4a61;
 }
 
+/* Other button colour matches VoodooBank-V4 */
 .wallet-btn-other {
-  background: #1e88e5;
+  background: #1e40af;
 }
 .wallet-btn-other:hover:not(:disabled) {
-  background: #1565c0;
+  background: #1d4ed8;
 }
 
 .wallet-btn.is-connected,
 .wallet-btn.connected {
   cursor: default;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  opacity: 1;
 }
 
 .wallet-btn-voodoo.is-connected,
@@ -55,11 +56,11 @@
 .wallet-btn-other.connected,
 .wallet-btn-other.is-connected:hover,
 .wallet-btn-other.connected:hover {
-  background: #1e88e5 !important;
+  background: #1e40af !important;
 }
 
 .wallet-btn:disabled {
-  opacity: 0.9;
+  opacity: 0.85;
   cursor: default;
 }
 
@@ -68,10 +69,11 @@
   width: 0;
   height: 0;
   overflow: visible;
-  z-index: 9999;
+  z-index: 2147483000;
+  pointer-events: none;
 }
 
-/* ── VoodooUI modal (1:1 with Staking / Bank / Faucet) ── */
+/* ── ui.js modals — identical to VoodooBank-V4 / Plinko / Miner ── */
 body.voodoo-ui-open {
   overflow: hidden;
 }
@@ -84,11 +86,12 @@ body.voodoo-ui-open {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #111;
+  /* Self-contained type — ignore body / page h2 rules (Tailwind too) */
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #111 !important;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -104,39 +107,44 @@ body.voodoo-ui-open {
 
 .voodoo-ui-panel {
   position: relative;
-  background: #fff;
-  color: #111;
+  background: #fff !important;
+  color: #111 !important;
   border-radius: 12px;
   padding: 1.5rem;
   max-width: 420px;
   width: 100%;
   text-align: center;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  box-shadow: none;
+  border: none;
 }
 
 .voodoo-ui-title {
-  margin: 0 0 0.5rem;
-  padding: 0;
-  font-family: inherit;
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.3;
-  color: #111;
-  letter-spacing: normal;
+  display: block;
+  margin: 0 0 0.5rem !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  color: #111 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
 }
 
 .voodoo-ui-message {
-  margin: 0 0 1rem;
-  padding: 0;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #374151;
+  display: block;
+  margin: 0 0 1rem !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #374151 !important;
   white-space: pre-wrap;
+  text-align: center;
 }
 
 .voodoo-ui-actions {
@@ -147,36 +155,36 @@ body.voodoo-ui-open {
 }
 
 .voodoo-ui-btn {
-  border: none;
-  border-radius: 8px;
-  padding: 0.55rem 1rem;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.55rem 1rem !important;
+  font-family: inherit !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
   cursor: pointer;
+  line-height: 1.25 !important;
+  min-width: auto;
+  height: auto;
 }
 
 .voodoo-ui-btn-primary {
-  background: #1e40af;
-  color: #fff;
-}
-
-.voodoo-ui-btn-primary:hover {
-  background: #1e3a8a;
+  background: #1e40af !important;
+  color: #fff !important;
 }
 
 .voodoo-ui-btn-secondary {
-  background: #e5e7eb;
-  color: #111;
+  background: #e5e7eb !important;
+  color: #111 !important;
   text-decoration: none;
   display: inline-flex;
 }
 
 .voodoo-ui-btn-ghost {
-  background: transparent;
-  color: #4b5563;
+  background: transparent !important;
+  color: #4b5563 !important;
 }
 
+/* Gray circle only — same as Bank (no red/green tint) */
 .voodoo-ui-icon {
   width: 48px;
   height: 48px;
@@ -185,27 +193,11 @@ body.voodoo-ui-open {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111;
-  background: #e5e7eb;
-}
-
-.voodoo-ui-icon[data-type="error"],
-.voodoo-ui-icon[data-type="warning"] {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.voodoo-ui-icon[data-type="success"] {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.voodoo-ui-icon[data-type="info"] {
-  background: #dbeafe;
-  color: #1d4ed8;
+  font-family: inherit !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111 !important;
+  background: #e5e7eb !important;
 }
 
 body {

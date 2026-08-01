@@ -617,39 +617,48 @@ window.DAO_WALLET = (() => {
   }
 
   /**
-   * Centered white modal — same as Staking / Bank / Faucet.
-   * Never dump install URLs into the red status banner.
+   * Same as VoodooBank-V4 setError → UiModal / normalizeNotify.
+   * Never use the red #error-log banner for wallet missing / connect errors.
    */
-  function showVoodooPopup(message) {
+  function setError(message, variant = 'error') {
     clearStatus();
+    if (!message) return Promise.resolve(false);
+
+    if (window.VoodooUI?.normalizeNotify) {
+      const normalized = window.VoodooUI.normalizeNotify(message, variant);
+      if (!normalized) {
+        // Quiet cancel (same as Bank)
+        console.info('[VoodooGovernance]', message);
+        return Promise.resolve(false);
+      }
+      return window.VoodooUI.show(normalized);
+    }
+
     if (window.VoodooUI?.notifyWalletError) {
       return window.VoodooUI.notifyWalletError(message);
     }
-    if (window.VoodooUI?.show) {
-      return window.VoodooUI.show({
-        title: 'Voodoo Wallet',
-        message:
-          'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.',
-        type: 'error',
-        okText: 'OK',
-      });
-    }
-    // last resort (should not happen if ui.js is loaded)
-    window.DAO_HELPERS?.setLog(
-      'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.',
-      true
+
+    // Should not happen if ui.js is loaded
+    window.dispatchEvent(
+      new CustomEvent('voodoo-ui-alert', {
+        detail: {
+          title: 'Voodoo Wallet',
+          message:
+            window.VoodooUI?.NOT_DETECTED_MSG ||
+            'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.',
+          type: 'error',
+          okText: 'OK',
+        },
+      })
     );
     return Promise.resolve(false);
   }
 
   async function connectVoodoo() {
-    const H = window.DAO_HELPERS;
-    H.setLog('Connecting Voodoo Wallet…');
+    // Bank-style: no status banner while connecting — only white modal on failure
+    clearStatus();
     try {
-      const result = await window.VoodooWallet.connectVoodoo((s) => {
-        if (s === 'detecting') H.setLog('Detecting Voodoo Wallet…');
-        if (s === 'opening' || s === 'requesting') H.setLog('Approve connection in Voodoo Wallet…');
-      });
+      const result = await window.VoodooWallet.connectVoodoo();
       applyResult(result);
       updateButtons();
       window.VoodooWallet.bindListeners(
@@ -659,7 +668,7 @@ window.DAO_WALLET = (() => {
         },
         () => location.reload()
       );
-      H.setLog('Voodoo Wallet connected on PulseChain.');
+      clearStatus();
       return state;
     } catch (err) {
       console.error(err);
@@ -672,12 +681,14 @@ window.DAO_WALLET = (() => {
       ) {
         return null;
       }
-      // Not installed / not detected → polished modal (no install URL in banner)
-      await showVoodooPopup(
-        err?.code === 'VOODOO_NOT_FOUND' || /not detected|not ready/i.test(String(err?.message || ''))
-          ? 'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.'
-          : err?.message || 'Voodoo Wallet connection failed'
-      );
+      // Not installed / not ready → exact Bank popup
+      if (err?.code === 'VOODOO_NOT_FOUND' || /not detected|not ready/i.test(String(err?.message || ''))) {
+        await setError(
+          'Voodoo Wallet was not detected. Install the extension, open it and sign in, then refresh this page and try again.'
+        );
+      } else {
+        await setError(err?.message || 'Voodoo Wallet connection failed');
+      }
       return null;
     }
   }
