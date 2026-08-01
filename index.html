@@ -11,13 +11,21 @@
     <meta name="theme-color" content="#0f172a" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/dao.css" />
+    <link rel="stylesheet" href="css/dao.css?v=2" />
+    <!-- Exact Custom scrollbar Plugin CSS (selectors: .windows-scrollbar) -->
+    <link rel="stylesheet" href="css/windows-scrollbar.css?v=1" />
     <link rel="stylesheet" href="js/rainbow-bridge.css" />
     <script src="https://unpkg.com/ethers@6.13.2/dist/ethers.umd.min.js"></script>
     <link rel="icon" href="assets/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="assets/favicon.png" />
 </head>
-<body class="flex flex-col">
+<body>
+<!--
+  #page-scroll.windows-scrollbar REQUIRED on modern Chrome/Edge:
+  root/body overlay scrollbars ignore ::-webkit-scrollbar.
+  Plugin CSS targets .windows-scrollbar on this scroller.
+-->
+<div id="page-scroll" class="windows-scrollbar">
 <!-- Header -->
 <nav class="flex items-center p-4 shadow-md bg-white">
     <div class="flex items-center flex-grow pl-4">
@@ -37,7 +45,6 @@
         </button>
     </div>
 </nav>
-<div id="rainbowkit-root"></div>
 
 <main class="flex-grow p-4 md:p-6 max-w-6xl mx-auto w-full">
     <div id="error-log" class="text-center mb-4 text-red-400 font-medium min-h-[1.25rem] text-sm"></div>
@@ -175,6 +182,21 @@
     </div>
 </main>
 
+<footer class="bg-black text-white py-5 mt-auto w-full">
+    <div class="px-6 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-lg">© 2026 VoodooGroup • All rights reserved</p>
+        <div class="flex space-x-8 mt-4 md:mt-0">
+            <a href="https://x.com/Voodoo_Token/" target="_blank" rel="noopener noreferrer" class="transition" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
+            <a href="https://t.me/+oBoh-NebaWcxMDQ0" target="_blank" rel="noopener noreferrer" class="transition" aria-label="Telegram"><i class="fa fa-telegram"></i></a>
+            <a href="https://www.youtube.com/@Voodoo_Token" target="_blank" rel="noopener noreferrer" class="transition" aria-label="YouTube"><i class="fa fa-youtube-play"></i></a>
+        </div>
+    </div>
+</footer>
+</div><!-- /#page-scroll -->
+
+<!-- Fixed overlays outside scroller -->
+<div id="rainbowkit-root"></div>
+
 <!-- Info Modal -->
 <div id="info-modal">
     <div id="info-content">
@@ -206,17 +228,6 @@
         <p class="text-sm text-gray-400 mt-4">Note: Native PLS sending is not possible (value hardcoded to 0).</p>
     </div>
 </div>
-
-<footer class="bg-black text-white py-5 mt-auto">
-    <div class="px-6 flex flex-col md:flex-row justify-between items-center">
-        <p class="text-lg">© 2026 VoodooGroup • All rights reserved</p>
-        <div class="flex space-x-8 mt-4 md:mt-0">
-            <a href="https://x.com/Voodoo_Token/" target="_blank" rel="noopener noreferrer" class="transition" aria-label="Twitter"><i class="fa fa-twitter"></i></a>
-            <a href="https://t.me/+oBoh-NebaWcxMDQ0" target="_blank" rel="noopener noreferrer" class="transition" aria-label="Telegram"><i class="fa fa-telegram"></i></a>
-            <a href="https://www.youtube.com/@Voodoo_Token" target="_blank" rel="noopener noreferrer" class="transition" aria-label="YouTube"><i class="fa fa-youtube-play"></i></a>
-        </div>
-    </div>
-</footer>
 
 <!-- App modules (order matters) -->
 <script src="js/config.js"></script>
