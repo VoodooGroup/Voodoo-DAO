@@ -1,3 +1,26 @@
+/* Create Proposal — fixed height when switching Normal ↔ Whitelist */
+.proposal-dynamic-fields {
+  display: grid;
+  /* Both field sets share the same cell → height = taller (normal) set */
+}
+
+.proposal-dynamic-fields > .proposal-fields-set {
+  grid-area: 1 / 1;
+  width: 100%;
+}
+
+.proposal-fields-set.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.proposal-fields-set:not(.is-hidden) {
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 1;
+}
+
 /* VoodooDAO Governance styles */
 
 /* Dual wallet buttons (same UX as Plinko / Faucet) */

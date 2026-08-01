@@ -97,11 +97,19 @@
     }
   });
 
+  // Toggle field sets without changing card height (CSS grid stack)
   document.getElementById('proposal-type').onchange = (e) => {
     const w = e.target.value === 'whitelist';
-    document.getElementById('target-address').style.display = w ? 'none' : 'block';
-    document.getElementById('call-data').style.display = w ? 'none' : 'block';
-    document.getElementById('new-target').style.display = w ? 'block' : 'none';
+    const normal = document.getElementById('fields-normal');
+    const whitelist = document.getElementById('fields-whitelist');
+    if (normal) {
+      normal.classList.toggle('is-hidden', w);
+      normal.setAttribute('aria-hidden', w ? 'true' : 'false');
+    }
+    if (whitelist) {
+      whitelist.classList.toggle('is-hidden', !w);
+      whitelist.setAttribute('aria-hidden', w ? 'false' : 'true');
+    }
   };
 
   // ─── Proposal tables ─────────────────────────────────────────

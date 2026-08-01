@@ -99,9 +99,16 @@
                 <option value="normal">Normal Proposal (transfer, call, etc.)</option>
                 <option value="whitelist">Add New Whitelist Target</option>
             </select>
-            <input type="text" id="target-address" placeholder="Target Address (0x...)" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg" />
-            <textarea id="call-data" placeholder="Calldata (0x...)" rows="3" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg"></textarea>
-            <input type="text" id="new-target" placeholder="New Target Address to Whitelist (0x...)" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg" style="display: none;" />
+            <!-- Stacked field sets keep the card height fixed when switching type -->
+            <div class="proposal-dynamic-fields mb-5">
+                <div id="fields-normal" class="proposal-fields-set">
+                    <input type="text" id="target-address" placeholder="Target Address (0x...)" class="w-full mb-5 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg" />
+                    <textarea id="call-data" placeholder="Calldata (0x...)" rows="3" class="w-full p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg"></textarea>
+                </div>
+                <div id="fields-whitelist" class="proposal-fields-set is-hidden" aria-hidden="true">
+                    <input type="text" id="new-target" placeholder="New Target Address to Whitelist (0x...)" class="w-full p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg" />
+                </div>
+            </div>
             <textarea id="description" placeholder="Description" rows="4" class="w-full mb-6 p-4 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-lg"></textarea>
             <button id="submit-proposal" disabled class="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-lg font-semibold transition disabled:opacity-50">Submit Proposal</button>
         </div>
