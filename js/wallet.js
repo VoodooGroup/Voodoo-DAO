@@ -155,19 +155,36 @@ window.VoodooWallet = (function () {
     }
   }
 
+  function isLockedWalletError(err) {
+    const msg = String(err?.message || err || '');
+    const code = err?.code;
+    return (
+      code === 4100 ||
+      code === 'VOODOO_LOCKED' ||
+      /unlock voodoo wallet first|wallet locked|is locked|unlock the (extension|wallet)/i.test(msg)
+    );
+  }
+
   function mapRequestError(err, kind) {
     const msg = String(err?.message || err || '');
     const code = err?.code;
     if (code === 4001 || /user rejected|rejected the request|ACTION_REJECTED/i.test(msg)) {
-      return new Error('Connection was cancelled in your wallet.');
+      const e = new Error('Connection was cancelled in your wallet.');
+      e.code = 'ACTION_REJECTED';
+      return e;
+    }
+    // Locked: eth_requestAccounts already opens the extension lock screen.
+    // Do NOT surface a second "wallet is locked" modal — silent for UI.
+    if (isLockedWalletError(err)) {
+      const e = new Error('VOODOO_LOCKED');
+      e.code = 'VOODOO_LOCKED';
+      e.silent = true;
+      return e;
     }
     if (code === 'VOODOO_TIMEOUT' || /timed out|timeout|no response/i.test(msg)) {
       return new Error(
         'Voodoo Wallet did not respond. Open the extension, unlock, then try again.'
       );
-    }
-    if (code === 4100 || /unlock voodoo wallet first|wallet locked/i.test(msg)) {
-      return new Error('Voodoo Wallet is locked. Unlock the extension, then try again.');
     }
     if (code === 'VOODOO_NOT_FOUND' || /not detected/i.test(msg)) {
       const e = new Error(
@@ -270,7 +287,14 @@ window.VoodooWallet = (function () {
     }
 
     if (!accounts?.length) {
-      throw new Error('No account was returned. Unlock the wallet and try again.');
+      // Empty accounts after request — treat like locked/cancelled for Voodoo (extension UI already open)
+      if (kind === 'voodoo') {
+        const e = new Error('VOODOO_LOCKED');
+        e.code = 'VOODOO_LOCKED';
+        e.silent = true;
+        throw e;
+      }
+      throw new Error('No account was returned by the wallet.');
     }
 
     let chainId = await readChainId(ethereum);
@@ -673,11 +697,15 @@ window.DAO_WALLET = (() => {
     } catch (err) {
       console.error(err);
       clearStatus();
-      // User cancelled — silent (same as Bank)
+      // User cancelled OR wallet locked — silent.
+      // eth_requestAccounts already opens the extension (lock screen if locked).
       if (
+        err?.silent ||
         err?.code === 4001 ||
         err?.code === 'ACTION_REJECTED' ||
-        /reject|denied|cancel|dismiss/i.test(String(err?.message || ''))
+        err?.code === 'VOODOO_LOCKED' ||
+        err?.code === 4100 ||
+        /reject|denied|cancel|dismiss|locked|unlock/i.test(String(err?.message || ''))
       ) {
         return null;
       }
