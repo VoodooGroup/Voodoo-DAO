@@ -694,8 +694,8 @@ window.DAO_WALLET = (() => {
   }
 
   async function connectOther() {
-    const H = window.DAO_HELPERS;
-    H.setLog('Opening wallet options…');
+    // Silent connect — no green status banner ("Select a wallet…", etc.)
+    clearStatus();
     try {
       // Prefer RainbowKit (same as Plinko / Faucet)
       if (window.VoodooRainbow?.ready || true) {
@@ -706,10 +706,7 @@ window.DAO_WALLET = (() => {
             forceConnect: true,
           });
           window.VoodooWallet.cancelPendingRainbow?.('restart');
-          const result = await window.VoodooWallet.connectOther((s) => {
-            if (s === 'opening') H.setLog('Select a wallet…');
-            if (s === 'connected') H.setLog('Wallet connected, finishing…');
-          });
+          const result = await window.VoodooWallet.connectOther();
           applyResult(result);
           updateButtons();
           window.VoodooWallet.bindListeners(
@@ -719,11 +716,11 @@ window.DAO_WALLET = (() => {
             },
             () => location.reload()
           );
-          H.setLog('Wallet connected on PulseChain.');
+          clearStatus();
           return state;
         } catch (e) {
           if (e?.code === 4001 || e?.code === 'ACTION_REJECTED' || /cancel/i.test(String(e?.message))) {
-            H.setLog('Connection cancelled.');
+            clearStatus();
             return null;
           }
           console.warn('Rainbow connect failed, trying injected fallback', e);
@@ -741,11 +738,19 @@ window.DAO_WALLET = (() => {
         },
         () => location.reload()
       );
-      H.setLog('Wallet connected on PulseChain.');
+      clearStatus();
       return state;
     } catch (err) {
       console.error(err);
-      H.setLog('Other wallet: ' + H.errMsg(err), true);
+      clearStatus();
+      if (
+        err?.code === 4001 ||
+        err?.code === 'ACTION_REJECTED' ||
+        /cancel|reject|denied/i.test(String(err?.message || ''))
+      ) {
+        return null;
+      }
+      await setError(err?.message || 'Wallet connection failed');
       return null;
     }
   }
